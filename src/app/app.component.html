@@ -1,21 +1,149 @@
-<!--The content below is only a placeholder and can be replaced.-->
-<div style="text-align:center">
-  <h1>
-    Welcome to {{ title }}!
-  </h1>
-  <img width="300" alt="Angular Logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
-</div>
-<h2>Here are some links to help you start: </h2>
-<ul>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://angular.io/cli">CLI Documentation</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
-  </li>
-</ul>
+<mat-vertical-stepper [linear]="isLinear" #stepper>
+  <mat-step [stepControl]="firstFormGroup" [editable]="isEditable">
+    <form [formGroup]="firstFormGroup">
+      <ng-template matStepLabel>Step - 1</ng-template>
+      <mat-form-field>
+        <input
+          type="text"
+          placeholder="Pick select Meal"
+          aria-label="Number"
+          matInput
+          formControlName="firstCtrl"
+          [matAutocomplete]="auto"
+        />
 
-<router-outlet></router-outlet>
+        <mat-autocomplete #auto="matAutocomplete">
+          <mat-option *ngFor="let option of options" [value]="option">
+            {{ option }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+      <div>
+        <mat-form-field>
+          <input
+            type="number"
+            min="1"
+            max="10"
+            matInput
+            placeholder="Please Enter Number of people"
+            formControlName="secondCtrl"
+            required
+          />
+        </mat-form-field>
+        <mat-error>
+          <span
+            *ngIf="
+              !firstFormGroup.get('secondCtrl').valid &&
+              firstFormGroup.get('secondCtrl').touched
+            "
+            >Number should be between 1 - 10</span
+          >
+        </mat-error>
+      </div>
+
+      <div>
+        <button mat-button matStepperNext (click)="getResturant()">Next</button>
+      </div>
+    </form>
+  </mat-step>
+  <mat-step [stepControl]="secondFormGroup" [editable]="isEditable">
+    <form [formGroup]="secondFormGroup">
+      <ng-template matStepLabel>Step 2</ng-template>
+      <mat-form-field>
+        <input
+          type="text"
+          placeholder="Please select resturant"
+          aria-label="Number"
+          matInput
+          formControlName="rest"
+          [matAutocomplete]="auto2"
+        />
+        <mat-autocomplete #auto2="matAutocomplete">
+          <mat-option *ngFor="let resturant of resturants" [value]="resturant">
+            {{ resturant }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+      <div>
+        <button mat-button matStepperPrevious>Back</button>
+        <button mat-button matStepperNext (click)="getDishes()">Next</button>
+      </div>
+    </form>
+  </mat-step>
+  <mat-step [stepControl]="thirdFormGroup" [editable]="isEditable">
+    <ng-template matStepLabel>Step 3</ng-template>
+    <form [formGroup]="thirdFormGroup">
+      <div formArrayName="dishes">
+        <div
+          class="col-6"
+          *ngFor="let dish of dishFormGroup.controls; let i = index"
+        >
+          <div [formGroupName]="i" class="row">
+            <mat-form-field>
+              <mat-label>Favorite food</mat-label>
+              <mat-select
+                formControlName="dish"
+                name="food"
+                (change)="dishChange()"
+              >
+                <ng-container *ngFor="let food of dishes">
+                  <mat-option
+                    [value]="food"
+                    [disabled]="selectedDishes.includes(food)"
+                  >
+                    {{ food }}
+                  </mat-option>
+                </ng-container>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field>
+              <input
+                type="number"
+                min="1"
+                max="10"
+                value="1"
+                matInput
+                placeholder="Please Enter Number of serving"
+                formControlName="serving"
+                required
+              />
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+      <button
+        mat-mini-fab
+        color="primary"
+        (click)="addDish()"
+        [disabled]="thirdFormGroup.invalid"
+      >
+        +
+      </button>
+
+      <div>
+        <button mat-button matStepperPrevious>Back</button>
+        <button mat-button (click)="reviewProfile(stepper)">Next</button>
+      </div>
+    </form>
+  </mat-step>
+  <mat-step [editable]="isEditable">
+    <ng-template matStepLabel>Review</ng-template>
+
+    <div class="row" *ngIf="responseData">
+      <div class="col-12">Meal : {{ responseData.meal }}</div>
+      <div class="col-12">No. of people : {{ responseData.personCount }}</div>
+      <div class="col-12">Restaurant : {{ responseData.resturant }}</div>
+
+      <div class="col-12" style="border: black solid 2px">
+        Dishes :
+        <span *ngFor="let d of responseData.dishes">
+          <p>{{ d.dish }} - {{ d.serving }}</p>
+        </span>
+      </div>
+    </div>
+    <div>
+      <button mat-button matStepperPrevious>Back</button>
+      <button mat-button (click)="submit(stepper)">Submit</button>
+    </div>
+  </mat-step>
+</mat-vertical-stepper>
