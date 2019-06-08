@@ -1,4 +1,7 @@
-# DotInfoTech
+## Run `npm i`
+# Start Mongodb server and Node JS server
+# serve angular project
+
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.0.2.
 
